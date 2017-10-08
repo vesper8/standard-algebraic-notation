@@ -1,0 +1,27 @@
+{
+    "name": "chesszebra/standard-algebraic-notation",
+    "description": "A PHP library that parses Standard Algebraic Notation (SAN) values.",
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": "^7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "ChessZebra\\StandardAlgebraicNotation\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ChessZebra\\StandardAlgebraicNotation\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "process-timeout": 5000,
+        "sort-packages": true
+    }
+}
