@@ -392,6 +392,16 @@ final class Notation
     }
 
     /**
+     * Sets the disambiguation column.
+     *
+     * @param null|string $movedPieceDisambiguationColumn
+     */
+    public function setMovedPieceDisambiguationColumn(?string $movedPieceDisambiguationColumn): void
+    {
+        $this->movedPieceDisambiguationColumn = $movedPieceDisambiguationColumn;
+    }
+
+    /**
      * Gets the disambiguation row.
      *
      * @return int|null
@@ -399,6 +409,16 @@ final class Notation
     public function getMovedPieceDisambiguationRow(): ?int
     {
         return $this->movedPieceDisambiguationRow;
+    }
+
+    /**
+     * Sets the disambiguation row.
+     *
+     * @param int|null $movedPieceDisambiguationRow
+     */
+    public function setMovedPieceDisambiguationRow(?int $movedPieceDisambiguationRow): void
+    {
+        $this->movedPieceDisambiguationRow = $movedPieceDisambiguationRow;
     }
 
     /**
