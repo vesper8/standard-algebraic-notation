@@ -17,16 +17,21 @@ use ChessZebra\StandardAlgebraicNotation\Exception\RuntimeException;
  */
 final class Notation
 {
-    const PIECE_PAWN = null;
-    const PIECE_BISHOP = 'B';
-    const PIECE_KING = 'K';
-    const PIECE_KNIGHT = 'N';
-    const PIECE_QUEEN = 'Q';
-    const PIECE_ROOK = 'R';
+    public const PIECE_PAWN = null;
+    public const PIECE_BISHOP = 'B';
+    public const PIECE_KING = 'K';
+    public const PIECE_KNIGHT = 'N';
+    public const PIECE_QUEEN = 'Q';
+    public const PIECE_ROOK = 'R';
 
-    const CASTLING_NONE = null;
-    const CASTLING_KING_SIDE = 'O-O';
-    const CASTLING_QUEEN_SIDE = 'O-O-O';
+    public const CASTLING_KING_SIDE = 'O-O';
+    public const CASTLING_QUEEN_SIDE = 'O-O-O';
+
+    public const ANNOTATION_BLUNDER = '??';
+    public const ANNOTATION_MISTAKE = '?';
+    public const ANNOTATION_INTERESTING_MOVE = '?!';
+    public const ANNOTATION_GOOD_MOVE = '!';
+    public const ANNOTATION_BRILLIANT_MOVE = '!!';
 
     /**
      * The original value.
@@ -106,6 +111,14 @@ final class Notation
     private $checkmate;
 
     /**
+     * An annotation given to a move.
+     * For example "Nbd7?!"
+     *
+     * @var null|string
+     */
+    private $annotation;
+
+    /**
      * Initializes a new instance of this class.
      *
      * @param string $value
@@ -130,57 +143,62 @@ final class Notation
     private function parse(string $value): void
     {
         // Check for castling:
-        if (preg_match('/^(O-O|O-O-O)(\+|\#?)$/', $value, $matches)) {
+        if (preg_match('/^(O-O|O-O-O)(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->castling = $matches[1];
             $this->check = $matches[2] === '+';
             $this->checkmate = $matches[2] === '#';
+            $this->annotation = isset($matches[3]) ? $matches[3] : null;
             return;
         }
 
         // Pawn movement:
-        if (preg_match('/^([a-h])([1-8])(\+|\#?)$/', $value, $matches)) {
+        if (preg_match('/^([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->targetColumn = $matches[1];
             $this->targetRow = (int)$matches[2];
             $this->check = $matches[3] === '+';
             $this->checkmate = $matches[3] === '#';
             $this->movedPiece = self::PIECE_PAWN;
+            $this->annotation = isset($matches[4]) ? $matches[4] : null;
             return;
         }
 
         // Piece movement:
-        if (preg_match('/^([KQBNR])([a-h])([1-8])(\+|\#?)$/', $value, $matches)) {
+        if (preg_match('/^([KQBNR])([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->movedPiece = $matches[1];
             $this->targetColumn = $matches[2];
             $this->targetRow = (int)$matches[3];
             $this->check = $matches[4] === '+';
             $this->checkmate = $matches[4] === '#';
+            $this->annotation = isset($matches[5]) ? $matches[5] : null;
             return;
         }
 
         // Piece movement from a specific column:
-        if (preg_match('/^([KQBNR])([a-h])([a-h])([1-8])(\+|\#?)$/', $value, $matches)) {
+        if (preg_match('/^([KQBNR])([a-h])([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->movedPiece = $matches[1];
             $this->movedPieceDisambiguationColumn = $matches[2];
             $this->targetColumn = $matches[3];
             $this->targetRow = (int)$matches[4];
             $this->check = $matches[5] === '+';
             $this->checkmate = $matches[5] === '#';
+            $this->annotation = isset($matches[6]) ? $matches[6] : null;
             return;
         }
 
         // Piece movement from a specific row:
-        if (preg_match('/^([KQBNR])([0-9])([a-h])([1-8])(\+|\#?)$/', $value, $matches)) {
+        if (preg_match('/^([KQBNR])([0-9])([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->movedPiece = $matches[1];
             $this->movedPieceDisambiguationRow = (int)$matches[2];
             $this->targetColumn = $matches[3];
             $this->targetRow = (int)$matches[4];
             $this->check = $matches[5] === '+';
             $this->checkmate = $matches[5] === '#';
+            $this->annotation = isset($matches[6]) ? $matches[6] : null;
             return;
         }
 
         // Pawn capture:
-        if (preg_match('/^([a-h])x([a-h])([1-8])(?:=([KQBNR]))?(\+|\#?)$/', $value, $matches)) {
+        if (preg_match('/^([a-h])x([a-h])([1-8])(?:=([KQBNR]))?(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->targetColumn = $matches[2];
             $this->targetRow = (int)$matches[3];
             $this->movedPiece = self::PIECE_PAWN;
@@ -189,22 +207,24 @@ final class Notation
             $this->promotedPiece = $matches[4] ?: null;
             $this->check = $matches[5] === '+';
             $this->checkmate = $matches[5] === '#';
+            $this->annotation = isset($matches[6]) ? $matches[6] : null;
             return;
         }
 
         // Piece capture:
-        if (preg_match('/^([KQBNR])x([a-h])([1-8])(\+|\#?)$/', $value, $matches)) {
+        if (preg_match('/^([KQBNR])x([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->movedPiece = $matches[1];
             $this->targetColumn = $matches[2];
             $this->targetRow = (int)$matches[3];
             $this->check = $matches[4] === '+';
             $this->checkmate = $matches[4] === '#';
             $this->capture = true;
+            $this->annotation = isset($matches[5]) ? $matches[5] : null;
             return;
         }
 
         // Piece capture from a specific column:
-        if (preg_match('/^([KQBNR])([a-h])x([a-h])([1-8])(\+|\#?)$/', $value, $matches)) {
+        if (preg_match('/^([KQBNR])([a-h])x([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->movedPiece = $matches[1];
             $this->movedPieceDisambiguationColumn = $matches[2];
             $this->targetColumn = $matches[3];
@@ -212,11 +232,12 @@ final class Notation
             $this->check = $matches[5] === '+';
             $this->checkmate = $matches[5] === '#';
             $this->capture = true;
+            $this->annotation = isset($matches[6]) ? $matches[6] : null;
             return;
         }
 
         // Piece capture from a specific column:
-        if (preg_match('/^([KQBNR])([0-9])x([a-h])([1-8])(\+|\#?)$/', $value, $matches)) {
+        if (preg_match('/^([KQBNR])([0-9])x([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->movedPiece = $matches[1];
             $this->movedPieceDisambiguationRow = (int)$matches[2];
             $this->targetColumn = $matches[3];
@@ -224,17 +245,19 @@ final class Notation
             $this->check = $matches[5] === '+';
             $this->checkmate = $matches[5] === '#';
             $this->capture = true;
+            $this->annotation = isset($matches[6]) ? $matches[6] : null;
             return;
         }
 
         // Check for pawn promotion:
-        if (preg_match('/^([a-h])([1-8])=([KQBNR])(\+|\#?)$/', $value, $matches)) {
+        if (preg_match('/^([a-h])([1-8])=?([KQBNR])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->movedPiece = self::PIECE_PAWN;
             $this->targetColumn = $matches[1];
             $this->targetRow = (int)$matches[2];
             $this->promotedPiece = $matches[3];
             $this->check = $matches[4] === '+';
             $this->checkmate = $matches[4] === '#';
+            $this->annotation = isset($matches[5]) ? $matches[5] : null;
             return;
         }
 
@@ -459,6 +482,16 @@ final class Notation
     public function isCheckmate(): bool
     {
         return $this->checkmate;
+    }
+
+    /**
+     * Gets the annotation that has been given to this move.
+     *
+     * @return null|string
+     */
+    public function getAnnotation(): ?string
+    {
+        return $this->annotation;
     }
 
     /**
