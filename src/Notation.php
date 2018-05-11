@@ -119,6 +119,13 @@ final class Notation
     private $annotation;
 
     /**
+     * A flag that indicates whether or not this notation is a long-SAN.
+     *
+     * @var bool
+     */
+    private $longSan;
+
+    /**
      * Initializes a new instance of this class.
      *
      * @param string $value
@@ -130,6 +137,7 @@ final class Notation
         $this->capture = false;
         $this->check = false;
         $this->checkmate = false;
+        $this->longSan = false;
 
         $this->parse($value);
     }
@@ -159,6 +167,20 @@ final class Notation
             $this->checkmate = $matches[3] === '#';
             $this->movedPiece = self::PIECE_PAWN;
             $this->annotation = isset($matches[4]) ? $matches[4] : null;
+            return;
+        }
+
+        // Pawn movement (long san):
+        if (preg_match('/^([a-h])([1-8])([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
+            $this->movedPieceDisambiguationColumn = $matches[1];
+            $this->movedPieceDisambiguationRow = (int)$matches[2];
+            $this->targetColumn = $matches[3];
+            $this->targetRow = (int)$matches[4];
+            $this->check = $matches[5] === '+';
+            $this->checkmate = $matches[5] === '#';
+            $this->movedPiece = self::PIECE_PAWN;
+            $this->annotation = isset($matches[6]) ? $matches[6] : null;
+            $this->longSan = true;
             return;
         }
 
@@ -197,6 +219,20 @@ final class Notation
             return;
         }
 
+        // Piece movement from a specific column and row (long san):
+        if (preg_match('/^([KQBNR])([a-h])([0-9])([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
+            $this->movedPiece = $matches[1];
+            $this->movedPieceDisambiguationColumn = $matches[2];
+            $this->movedPieceDisambiguationRow = (int)$matches[3];
+            $this->targetColumn = $matches[4];
+            $this->targetRow = (int)$matches[5];
+            $this->check = $matches[6] === '+';
+            $this->checkmate = $matches[6] === '#';
+            $this->annotation = isset($matches[7]) ? $matches[7] : null;
+            $this->longSan = true;
+            return;
+        }
+
         // Pawn capture:
         if (preg_match('/^([a-h])x([a-h])([1-8])(?:=([KQBNR]))?(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->targetColumn = $matches[2];
@@ -208,6 +244,22 @@ final class Notation
             $this->check = $matches[5] === '+';
             $this->checkmate = $matches[5] === '#';
             $this->annotation = isset($matches[6]) ? $matches[6] : null;
+            return;
+        }
+
+        // Pawn capture (long san):
+        if (preg_match('/^([a-h])([1-8])x([a-h])([1-8])(?:=([KQBNR]))?(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
+            $this->targetColumn = $matches[3];
+            $this->targetRow = (int)$matches[4];
+            $this->movedPiece = self::PIECE_PAWN;
+            $this->movedPieceDisambiguationColumn = $matches[1];
+            $this->movedPieceDisambiguationRow = (int)$matches[2];
+            $this->capture = true;
+            $this->promotedPiece = $matches[5] ?: null;
+            $this->check = $matches[6] === '+';
+            $this->checkmate = $matches[6] === '#';
+            $this->annotation = isset($matches[7]) ? $matches[7] : null;
+            $this->longSan = true;
             return;
         }
 
@@ -236,7 +288,7 @@ final class Notation
             return;
         }
 
-        // Piece capture from a specific column:
+        // Piece capture from a specific row:
         if (preg_match('/^([KQBNR])([0-9])x([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->movedPiece = $matches[1];
             $this->movedPieceDisambiguationRow = (int)$matches[2];
@@ -246,6 +298,21 @@ final class Notation
             $this->checkmate = $matches[5] === '#';
             $this->capture = true;
             $this->annotation = isset($matches[6]) ? $matches[6] : null;
+            return;
+        }
+
+        // Piece capture from a specific column and row (long san):
+        if (preg_match('/^([KQBNR])([a-h])([0-9])x([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
+            $this->movedPiece = $matches[1];
+            $this->movedPieceDisambiguationColumn = $matches[2];
+            $this->movedPieceDisambiguationRow = (int)$matches[3];
+            $this->targetColumn = $matches[4];
+            $this->targetRow = (int)$matches[5];
+            $this->check = $matches[6] === '+';
+            $this->checkmate = $matches[6] === '#';
+            $this->capture = true;
+            $this->annotation = isset($matches[7]) ? $matches[7] : null;
+            $this->longSan = true;
             return;
         }
 
@@ -492,6 +559,16 @@ final class Notation
     public function getAnnotation(): ?string
     {
         return $this->annotation;
+    }
+
+    /**
+     * Checks whether or not this notation is in long-SAN format.
+     *
+     * @return bool
+     */
+    public function isLongSan(): bool
+    {
+        return $this->longSan;
     }
 
     /**

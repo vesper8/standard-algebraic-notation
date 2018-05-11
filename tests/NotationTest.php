@@ -176,6 +176,23 @@ final class NotationTest extends TestCase
         static::assertEquals(4, $notation->getTargetRow());
     }
 
+    public function testPawnMovementLongSan()
+    {
+        // Arrange
+        $value = 'e2e4';
+
+        // Act
+        $notation = new Notation($value);
+
+        // Assert
+        static::assertEquals(Notation::PIECE_PAWN, $notation->getMovedPiece());
+        static::assertEquals('e', $notation->getMovedPieceDisambiguationColumn());
+        static::assertEquals(2, $notation->getMovedPieceDisambiguationRow());
+        static::assertEquals('e', $notation->getTargetColumn());
+        static::assertEquals(4, $notation->getTargetRow());
+        static::assertTrue($notation->isLongSan());
+    }
+
     public function testPawnMovementCheck()
     {
         // Arrange
@@ -312,6 +329,26 @@ final class NotationTest extends TestCase
         static::assertEquals(1, $notation->getMovedPieceDisambiguationRow());
     }
 
+    /**
+     * @todo Write a test for each piece
+     */
+    public function testPieceMovementFromColumnAndRow()
+    {
+        // Arrange
+        $value = 'Nd1e4';
+
+        // Act
+        $notation = new Notation($value);
+
+        // Assert
+        static::assertEquals(Notation::PIECE_KNIGHT, $notation->getMovedPiece());
+        static::assertEquals('e', $notation->getTargetColumn());
+        static::assertEquals(4, $notation->getTargetRow());
+        static::assertEquals('d', $notation->getMovedPieceDisambiguationColumn());
+        static::assertEquals(1, $notation->getMovedPieceDisambiguationRow());
+        static::assertTrue($notation->isLongSan());
+    }
+
     public function testPawnCapture()
     {
         // Arrange
@@ -325,6 +362,23 @@ final class NotationTest extends TestCase
         static::assertEquals(4, $notation->getTargetRow());
         static::assertEquals('e', $notation->getMovedPieceDisambiguationColumn());
         static::assertTrue($notation->isCapture());
+    }
+
+    public function testPawnCaptureLongSan()
+    {
+        // Arrange
+        $value = 'e3xd4';
+
+        // Act
+        $notation = new Notation($value);
+
+        // Assert
+        static::assertEquals('d', $notation->getTargetColumn());
+        static::assertEquals(4, $notation->getTargetRow());
+        static::assertEquals('e', $notation->getMovedPieceDisambiguationColumn());
+        static::assertEquals(3, $notation->getMovedPieceDisambiguationRow());
+        static::assertTrue($notation->isCapture());
+        static::assertTrue($notation->isLongSan());
     }
 
     /**
@@ -380,6 +434,26 @@ final class NotationTest extends TestCase
         static::assertEquals(3, $notation->getMovedPieceDisambiguationRow());
         static::assertEquals('d', $notation->getTargetColumn());
         static::assertEquals(4, $notation->getTargetRow());
+    }
+
+    /**
+     * @todo Write a test for each piece
+     */
+    public function testPieceCaptureFromColumnAndRow()
+    {
+        // Arrange
+        $value = 'Ke3xd4';
+
+        // Act
+        $notation = new Notation($value);
+
+        // Assert
+        static::assertEquals(Notation::PIECE_KING, $notation->getMovedPiece());
+        static::assertEquals('e', $notation->getMovedPieceDisambiguationColumn());
+        static::assertEquals(3, $notation->getMovedPieceDisambiguationRow());
+        static::assertEquals('d', $notation->getTargetColumn());
+        static::assertEquals(4, $notation->getTargetRow());
+        static::assertTrue($notation->isLongSan());
     }
 
     /**
@@ -501,5 +575,29 @@ final class NotationTest extends TestCase
 
         // Assert
         static::assertEquals('e4', $result);
+    }
+
+    public function testSetMovedPieceDisambiguationColumn()
+    {
+        // Arrange
+        $notation = new Notation('e4');
+
+        // Act
+        $notation->setMovedPieceDisambiguationColumn('d');
+
+        // Assert
+        static::assertEquals('d', $notation->getMovedPieceDisambiguationColumn());
+    }
+
+    public function testSetMovedPieceDisambiguationRow()
+    {
+        // Arrange
+        $notation = new Notation('e4');
+
+        // Act
+        $notation->setMovedPieceDisambiguationRow(3);
+
+        // Assert
+        static::assertEquals(3, $notation->getMovedPieceDisambiguationRow());
     }
 }
