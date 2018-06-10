@@ -234,7 +234,7 @@ final class Notation
         }
 
         // Pawn capture:
-        if (preg_match('/^([a-h])x([a-h])([1-8])(?:=([KQBNR]))?(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
+        if (preg_match('/^([a-h])x([a-h])([1-8])(?:=?([KQBNR]))?(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->targetColumn = $matches[2];
             $this->targetRow = (int)$matches[3];
             $this->movedPiece = self::PIECE_PAWN;
@@ -248,7 +248,7 @@ final class Notation
         }
 
         // Pawn capture (long san):
-        if (preg_match('/^([a-h])([1-8])x([a-h])([1-8])(?:=([KQBNR]))?(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
+        if (preg_match('/^([a-h])([1-8])x([a-h])([1-8])(?:=?([KQBNR]))?(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->targetColumn = $matches[3];
             $this->targetRow = (int)$matches[4];
             $this->movedPiece = self::PIECE_PAWN;

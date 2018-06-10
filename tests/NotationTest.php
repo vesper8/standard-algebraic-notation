@@ -477,6 +477,42 @@ final class NotationTest extends TestCase
     /**
      * @todo Write a test for each piece
      */
+    public function testPawnPromotionFromPawnCapture()
+    {
+        // Arrange
+        $value = 'hxg1=Q';
+
+        // Act
+        $notation = new Notation($value);
+
+        // Assert
+        static::assertEquals(Notation::PIECE_PAWN, $notation->getMovedPiece());
+        static::assertEquals('g', $notation->getTargetColumn());
+        static::assertEquals(1, $notation->getTargetRow());
+        static::assertEquals(Notation::PIECE_QUEEN, $notation->getPromotedPiece());
+    }
+
+    /**
+     * @todo Write a test for each piece
+     */
+    public function testPawnPromotionFromPawnCaptureWithoutEqualSign()
+    {
+        // Arrange
+        $value = 'hxg1Q';
+
+        // Act
+        $notation = new Notation($value);
+
+        // Assert
+        static::assertEquals(Notation::PIECE_PAWN, $notation->getMovedPiece());
+        static::assertEquals('g', $notation->getTargetColumn());
+        static::assertEquals(1, $notation->getTargetRow());
+        static::assertEquals(Notation::PIECE_QUEEN, $notation->getPromotedPiece());
+    }
+
+    /**
+     * @todo Write a test for each piece
+     */
     public function testGetTargetColumnIndex()
     {
         // Arrange
