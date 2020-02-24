@@ -118,6 +118,34 @@ final class NotationTest extends TestCase
         static::assertEquals(Notation::ANNOTATION_BRILLIANT_MOVE, $notation->getAnnotation());
     }
 
+    public function testCastlingKingSideZeroes()
+    {
+        // Arrange
+        $value = '0-0';
+
+        // Act
+        $notation = new Notation($value);
+
+        // Assert
+        static::assertTrue($notation->isCastlingTowardsKingSide());
+        static::assertTrue($notation->isCastlingMove());
+        static::assertEquals(Notation::CASTLING_KING_SIDE, $notation->getCastling());
+    }
+
+    public function testCastlingQueenSideZeroes()
+    {
+        // Arrange
+        $value = '0-0-0';
+
+        // Act
+        $notation = new Notation($value);
+
+        // Assert
+        static::assertTrue($notation->isCastlingTowardsQueenSide());
+        static::assertTrue($notation->isCastlingMove());
+        static::assertEquals(Notation::CASTLING_QUEEN_SIDE, $notation->getCastling());
+    }
+
     public function testCastlingQueenSide()
     {
         // Arrange

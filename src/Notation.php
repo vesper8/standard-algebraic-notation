@@ -159,6 +159,15 @@ final class Notation
             return;
         }
 
+        // Check for castling:
+        if (preg_match('/^(0-0|0-0-0)(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
+            $this->castling = $matches[1];
+            $this->check = $matches[2] === '+';
+            $this->checkmate = $matches[2] === '#';
+            $this->annotation = isset($matches[3]) ? $matches[3] : null;
+            return;
+        }
+
         // Pawn movement:
         if (preg_match('/^([a-h])([1-8])(\+|\#?)(\?\?|\?|\?\!|\!|\!\!)?$/', $value, $matches)) {
             $this->targetColumn = $matches[1];
